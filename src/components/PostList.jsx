@@ -6,12 +6,15 @@ import { useEffect, useState } from "react";
 
 function PostList({ isPosting, onStopPosting }) {
   const [posts, setPosts] = useState([]);
+  const [isFetching, setIsFetching] = useState(false);
 
   useEffect(() => {
     async function fetchPosts() {
+      setIsFetching(true);
       const response = await fetch("http://localhost:8080/posts");
       const resdata = await response.json();
       setPosts(resdata.posts);
+      setIsFetching(false);
     }
     fetchPosts();
   }, []);
@@ -29,7 +32,7 @@ function PostList({ isPosting, onStopPosting }) {
   }
   return (
     <>
-      {isPosting && (
+      {!isFetching && isPosting && (
         <Modal onClose={onStopPosting}>
           <NewPost onCancel={onStopPosting} onAddPost={addPostHandler} />
         </Modal>
@@ -45,10 +48,15 @@ function PostList({ isPosting, onStopPosting }) {
           ))}
         </ul>
       )}
-      {posts.length === 0 && (
+      {!isFetching && posts.length === 0 && (
         <div style={{ textAlign: "center", color: "white " }}>
           <h2>No posts yet</h2>
           <p>Start add some! click on new post Button</p>
+        </div>
+      )}
+      {isFetching && (
+        <div style={{ textAlign: "center", color: "white" }}>
+          <p>Loading...</p>
         </div>
       )}
     </>
